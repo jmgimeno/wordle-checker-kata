@@ -21,6 +21,13 @@ class WordleTest {
                 .guess("bbbba")).isEqualTo("....A");
 
 
-
+        Assertions.assertThat(new Wordle("abbbb")
+                .guess("caccc")).isEqualTo(".a...");
+        Assertions.assertThat(new Wordle("abbbb")
+                .guess("ccacc")).isEqualTo("..a..");
+        Assertions.assertThat(new Wordle("abbbb")
+                .guess("cccac")).isEqualTo("...a.");
+        Assertions.assertThat(new Wordle("abbbb")
+                .guess("cccca")).isEqualTo("....a");
     }
 }

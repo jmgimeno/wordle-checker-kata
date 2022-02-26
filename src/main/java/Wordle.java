@@ -85,14 +85,12 @@ public record Wordle(String hiddenAsString) {
         Hidden hidden = new Hidden(hiddenAsString);
 
         return IntStream.range(0, guess.length())
-                .mapToObj(
-                        index -> switch (guess.checkCharacterAtPosition(index). with(hidden)) {
-                            case WELL_PLACED letter ->
-                                    Character.toString(letter.codePoint()).toUpperCase();
-                            case NOT_WELL_PLACED letter ->
-                                    Character.toString(letter.codePoint());
-                            case ABSENT letter ->
-                                    ".";
+                .mapToObj(index -> guess.checkCharacterAtPosition(index).with(hidden))
+                .map(
+                        l -> switch (l) {
+                            case WELL_PLACED letter -> Character.toString(letter.codePoint()).toUpperCase();
+                            case NOT_WELL_PLACED letter -> Character.toString(letter.codePoint());
+                            case ABSENT letter -> ".";
                         })
                 .collect(Collectors.joining());
     }

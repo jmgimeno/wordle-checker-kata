@@ -1,17 +1,12 @@
+
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public record Wordle(String hiddenAsString) {
 
     record Guess(String guess) {
-
-        public GuessWithIndex hasLetterAtPosition(int index) {
-            return new GuessWithIndex(this, index);
-        }
-
-        public int length() {
-            return guess.length();
-        }
 
         public int codePointAt(int i) {
             return guess.codePointAt(i);
@@ -19,6 +14,20 @@ public record Wordle(String hiddenAsString) {
 
         public GuessWithIndex checkCharacterAtPosition(int index) {
             return new GuessWithIndex(this, index);
+        }
+
+        public LetterStream checkAgainst(Hidden hidden) {
+            return new LetterStream(IntStream.range(0, guess.length())
+                    .mapToObj(index -> checkCharacterAtPosition(index).with(hidden)));
+
+        }
+    }
+
+    record LetterStream(Stream<Letter> stream) {
+        String replaceEachLetterWith(Function<Letter, String> mapper) {
+            return stream
+                    .map(mapper)
+                    .collect(Collectors.joining());
         }
     }
 
@@ -84,14 +93,16 @@ public record Wordle(String hiddenAsString) {
         Guess guess = new Guess(guessAsString);
         Hidden hidden = new Hidden(hiddenAsString);
 
-        return IntStream.range(0, guess.length())
-                .mapToObj(index -> guess.checkCharacterAtPosition(index).with(hidden))
-                .map(
+        return guess
+                .checkAgainst(hidden)
+                .replaceEachLetterWith(
                         l -> switch (l) {
-                            case WELL_PLACED letter -> Character.toString(letter.codePoint()).toUpperCase();
-                            case NOT_WELL_PLACED letter -> Character.toString(letter.codePoint());
-                            case ABSENT letter -> ".";
-                        })
-                .collect(Collectors.joining());
+                            case WELL_PLACED letter ->
+                                    Character.toString(letter.codePoint()).toUpperCase();
+                            case NOT_WELL_PLACED letter ->
+                                    Character.toString(letter.codePoint());
+                            case ABSENT letter ->
+                                    ".";
+                        });
     }
 }

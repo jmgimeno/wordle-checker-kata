@@ -1,30 +1,43 @@
 public record Wordle(String hidden) {
 
-    public String guess(String guess) {
+    record Guess(String guess) {
+
+        public GuessWithIndex hasLetterAtPosition(int index) {
+            return new GuessWithIndex(this, index);
+        }
+
+        public int length() {
+            return guess.length();
+        }
+
+        public int codePointAt(int i) {
+            return guess.codePointAt(i);
+        }
+    }
+
+    record GuessWithIndex(Guess guess, int index) {
+
+        public boolean thatIsWellPlacedIn(String hidden) {
+            return guess.codePointAt(index) == hidden.codePointAt(index);
+        }
+
+        public boolean thatIsNotWellPlacedIn(String hidden) {
+            return false;
+        }
+    }
+
+    public String guess(String guessAsString) {
         String result = "";
-        boolean[] used = new boolean[hidden.length()];
+        Guess guess = new Guess(guessAsString);
         for (int i = 0; i < guess.length(); i++) {
-            if (guess.codePointAt(i) == hidden.codePointAt(i)) {
+            if (guess.hasLetterAtPosition(i)
+                    .thatIsWellPlacedIn(hidden)) {
                 result += Character.toString(guess.codePointAt(i)).toUpperCase();
-                used[i] = true;
+            } else if (guess.hasLetterAtPosition(i)
+                    .thatIsNotWellPlacedIn(hidden)) {
+                result += Character.toString(guess.codePointAt(i));
             } else {
-                boolean found = false;
-                for (int j = 0; j < hidden.length(); j++) {
-                    if (used[j]) {
-                        continue;
-                    }
-                    if (i != j
-                            && guess.codePointAt(j) != hidden.codePointAt(j)
-                            && guess.codePointAt(i) == hidden.codePointAt(j)) {
-                        result += Character.toString(guess.codePointAt(i));
-                        used[j] = true;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    result += ".";
-                }
+                result += ".";
             }
         }
         return result;

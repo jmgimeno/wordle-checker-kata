@@ -1,3 +1,5 @@
+import java.util.stream.IntStream;
+
 public record Wordle(String hiddenAsString) {
 
     record Guess(String guess) {
@@ -48,14 +50,11 @@ public record Wordle(String hiddenAsString) {
         }
 
         public boolean thatIsNotWellPlacedIn(Hidden hidden) {
-            for (int i = 0; i < hidden.length(); i++) {
-                if (index != i
-                        && guess.codePointAt(i) != hidden.codePointAt(i)
-                        && hidden.match(this, index, i)) {
-                    return true;
-                }
-            }
-            return false;
+
+            return IntStream.range(0, hidden.length())
+                    .filter(i -> index != i)
+                    .filter(i -> guess.codePointAt(i) != hidden.codePointAt(i))
+                    .anyMatch(i -> hidden.match(this, index, i));
         }
     }
 

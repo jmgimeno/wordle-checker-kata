@@ -29,5 +29,8 @@ class WordleTest {
                 .guess("cccac")).isEqualTo("...a.");
         Assertions.assertThat(new Wordle("abbbb")
                 .guess("cccca")).isEqualTo("....a");
+
+        Assertions.assertThat(new Wordle("bbabb")
+                .guess("aaaaa")).isEqualTo("..A..");
     }
 }

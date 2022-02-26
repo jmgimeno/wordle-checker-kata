@@ -24,6 +24,7 @@ public record Wordle(String hidden) {
         public boolean thatIsNotWellPlacedIn(String hidden) {
             for (int i = 0; i < hidden.length(); i++) {
                 if (index != i
+                        && guess.codePointAt(i) != hidden.codePointAt(i)
                         && guess.codePointAt(index) == hidden.codePointAt(i)) {
                     return true;
                 }

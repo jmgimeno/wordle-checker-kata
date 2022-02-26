@@ -29,9 +29,9 @@ class WordleTest {
         Assertions.assertThat(new Wordle("abbbb")
                 .guess("cccca")).isEqualTo("....a");
 
-//        Assertions.assertThat(new Wordle("bbabb")
-//                .guess("aaaaa")).isEqualTo("..A..");
-//
+        Assertions.assertThat(new Wordle("bbabb")
+                .guess("aaaaa")).isEqualTo("..A..");
+
 //        Assertions.assertThat(new Wordle("abbbb")
 //                .guess("accca")).isEqualTo("A....");
 //        Assertions.assertThat(new Wordle("abbbb")

@@ -16,6 +16,10 @@ public record Wordle(String hiddenAsString) {
         public int codePointAt(int i) {
             return guess.codePointAt(i);
         }
+
+        public GuessWithIndex checkCharacterAtPosition(int index) {
+            return new GuessWithIndex(this, index);
+        }
     }
 
     record Hidden(String hidden, boolean[] used) {
@@ -46,18 +50,35 @@ public record Wordle(String hiddenAsString) {
 
     record GuessWithIndex(Guess guess, int index) {
 
-        public boolean thatIsWellPlacedIn(Hidden hidden) {
+        public boolean isWellPlacedIn(Hidden hidden) {
             return hidden.match(this, index, index);
         }
 
-        public boolean thatIsNotWellPlacedIn(Hidden hidden) {
+        public boolean isNotWellPlacedIn(Hidden hidden) {
 
             return IntStream.range(0, hidden.length())
                     .filter(i -> index != i)
                     .filter(i -> guess.codePointAt(i) != hidden.codePointAt(i))
                     .anyMatch(i -> hidden.match(this, index, i));
         }
+
+        public Letter with(Hidden hidden) {
+            if (isWellPlacedIn(hidden)) {
+                return new WELL_PLACED(guess.codePointAt(index));
+            } else if (isNotWellPlacedIn(hidden)) {
+                return new NOT_WELL_PLACED(guess.codePointAt(index));
+            } else {
+                return new ABSENT();
+            }
+        }
     }
+
+    sealed interface Letter
+    permits WELL_PLACED, NOT_WELL_PLACED, ABSENT {}
+
+    record WELL_PLACED(int codePoint) implements Letter {}
+    record NOT_WELL_PLACED(int codePoint) implements Letter {}
+    record ABSENT() implements Letter {}
 
     public String guess(String guessAsString) {
         Guess guess = new Guess(guessAsString);
@@ -65,16 +86,13 @@ public record Wordle(String hiddenAsString) {
 
         return IntStream.range(0, guess.length())
                 .mapToObj(
-                        i -> {
-                            if (guess.hasLetterAtPosition(i)
-                                    .thatIsWellPlacedIn(hidden)) {
-                                return Character.toString(guess.codePointAt(i)).toUpperCase();
-                            } else if (guess.hasLetterAtPosition(i)
-                                    .thatIsNotWellPlacedIn(hidden)) {
-                                return Character.toString(guess.codePointAt(i));
-                            } else {
-                                return ".";
-                            }
+                        index -> switch (guess.checkCharacterAtPosition(index). with(hidden)) {
+                            case WELL_PLACED letter ->
+                                    Character.toString(letter.codePoint()).toUpperCase();
+                            case NOT_WELL_PLACED letter ->
+                                    Character.toString(letter.codePoint());
+                            case ABSENT letter ->
+                                    ".";
                         })
                 .collect(Collectors.joining());
     }

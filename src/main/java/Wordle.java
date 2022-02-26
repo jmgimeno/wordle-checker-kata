@@ -1,3 +1,4 @@
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public record Wordle(String hiddenAsString) {
@@ -59,20 +60,22 @@ public record Wordle(String hiddenAsString) {
     }
 
     public String guess(String guessAsString) {
-        String result = "";
         Guess guess = new Guess(guessAsString);
         Hidden hidden = new Hidden(hiddenAsString);
-        for (int i = 0; i < guess.length(); i++) {
-            if (guess.hasLetterAtPosition(i)
-                    .thatIsWellPlacedIn(hidden)) {
-                result += Character.toString(guess.codePointAt(i)).toUpperCase();
-            } else if (guess.hasLetterAtPosition(i)
-                    .thatIsNotWellPlacedIn(hidden)) {
-                result += Character.toString(guess.codePointAt(i));
-            } else {
-                result += ".";
-            }
-        }
-        return result;
+
+        return IntStream.range(0, guess.length())
+                .mapToObj(
+                        i -> {
+                            if (guess.hasLetterAtPosition(i)
+                                    .thatIsWellPlacedIn(hidden)) {
+                                return Character.toString(guess.codePointAt(i)).toUpperCase();
+                            } else if (guess.hasLetterAtPosition(i)
+                                    .thatIsNotWellPlacedIn(hidden)) {
+                                return Character.toString(guess.codePointAt(i));
+                            } else {
+                                return ".";
+                            }
+                        })
+                .collect(Collectors.joining());
     }
 }
